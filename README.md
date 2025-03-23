@@ -15,11 +15,11 @@ The PDF version of the paper is available [here](). If you find our RLDE-AFL use
 }
 ```
 
-<!-- ## Requirements
+## Requirements
 You can install all of dependencies of RLDE-AFL via the command below.
 ```bash
 pip install -r requirements.txt
-``` -->
+```
 
 ## Train
 The training process can be activated via the command below, which is just an example.
