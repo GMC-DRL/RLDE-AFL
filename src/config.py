@@ -1,11 +1,10 @@
-# example : gleet
 import argparse
 import json
 import time
 import os
 
 
-crossover_operators = ["binomial", "exponential", "prefential", "MDE_pBX"]
+crossover_operators = ["binomial", "exponential", "MDE_pBX"]
 mutation_operators =["best_1", "best_2", "rand_1", "rand_2","current_to_best_1",
                             "rand_to_best_1","current_to_rand_1","MDE_pBX", "pro_rand_1",
                             "TopoMut_DE","JADE", "HARDDE","current_to_rand_1_archive","weighted_rand_to_qbest_1"]
@@ -31,7 +30,7 @@ def get_config(args = None, config_file = None):
     parser.add_argument('--no_rollout', action = 'store_true', help = 'disable rollout in training')
     parser.add_argument('--no_save_epoch', action = 'store_true', help = 'save agent per epoch')
     parser.add_argument('--show_figs', action = 'store_true', help = 'enable figure logging')
-    # todo rollout
+
     # --------------------- Training Parameters ---------------------
     parser.add_argument('--max_learning_step', type = int, default = 1500000,
                         help = 'the maximum learning step for training')
@@ -47,18 +46,17 @@ def get_config(args = None, config_file = None):
                         help = 'batch size of testing set')
 
 
-
     # --------------------- Environment Parameters ---------------------
     parser.add_argument('--pop_size', type = int, default = 100, help = 'population size')
     parser.add_argument('--max_G', type = int, default = 1000, help = 'maximum number of generations')
-    parser.add_argument('--max_fes', type = int, default = 10000, help = 'maximum number of function evaluations')
+    parser.add_argument('--max_fes', type = int, default = 20000, help = 'maximum number of function evaluations')
     # max_fes>20000    ?50000
     parser.add_argument('--de_mutation_op', type = str, nargs = '+', default = mutation_operators,
                         help = 'Select De_mutation_op you want add in agent')
     # --de_mutation_op best_1 best_2 rand_1 rand_2
     parser.add_argument('--crossover_op', type = str, nargs = '+', default = crossover_operators,
                         help = 'Select crossover_op you want add in agent')
-    parser.add_argument('--reward_ratio', type = float, default = 0.0)
+    parser.add_argument('--reward_ratio', type = float, default = 1.0)
 
     # --------------------- Agent Parameters ---------------------
     parser.add_argument('--fe_hidden_dim', type = int, default = 64,
@@ -75,16 +73,11 @@ def get_config(args = None, config_file = None):
     parser.add_argument('--ppo_eps', type = float, default = 0.2)
     parser.add_argument('--ppo_n_step', type = int, default = 10)
     parser.add_argument('--ppo_k_epochs', type = int, default = 3)
-    parser.add_argument('--seed', type = int, default = 0)
-    parser.add_argument('--trainset_seed', type = int, default = 0)
-    parser.add_argument('--testset_seed', type = int, default = 0)
-    # test todo 后面再搞
-    parser.add_argument('--fe_train', action = 'store_true', help = 'training fe')
-    parser.add_argument('--mlp', action = 'store_true', help = 'fe is mlp?')
-    parser.add_argument('--fe_gleet', action = 'store_true') # 特征是否是手工，消融用
-    parser.add_argument('--test_all', action = 'store_true', help = '测试的时候把训练的也加进来')
-    
-
+    parser.add_argument('--seed', type = int, default = 7)
+    parser.add_argument('--trainset_seed', type = int, default = 13)
+    parser.add_argument('--testset_seed', type = int, default = 1024)
+    parser.add_argument('--fe_train', action = 'store_true', default = True, help = 'training fe')
+    parser.add_argument('--test_all', action = 'store_true')
 
     parser.add_argument('--save_dir', type = str, default = 'outputs/model/train', help = 'directory to write output models to')
     parser.add_argument('--log_dir', type = str, default = 'outputs/logs', help = 'directory to write TensorBoard information to')
@@ -105,23 +98,13 @@ def get_config(args = None, config_file = None):
                 if hasattr(config, key):
                     setattr(config, key, value)
 
-    # config.maxFEs = 2000 * config.dim
-    #
-    # config.n_logpoint = 50 # 记录点的log个数
     config.save_interval = config.max_learning_step // config.n_checkpoint # 保存model 间隔
     config.log_interval = config.max_fes // config.n_logpoint # 记录的间隔
 
-    # config.run_time = time.strftime("%Y%m%dT%H%M%S")
-    # config.run_name = "{}_{}".format(config.run_name, config.run_time) \
-    #     if not config.resume else config.resume.split('/')[-2]
     config.run_time = f'{config.run_name}-{time.strftime("%Y%m%dT%H%M%S")}_{config.problem}_{config.difficulty}_{config.dim}D'
     config.test_log_dir = config.log_dir + '/test/' + config.run_time + '/'
     config.rollout_log_dir = config.log_dir + '/rollout/' + config.run_time + '/'
-    # config.save_dir = os.path.join(
-    #     config.output_dir,
-    #     "{}_{}".format(config.problem, config.dim),
-    #     config.run_name
-    # ) if not config.no_saving else None
+
     if config.train:
         config.save_dir = config.save_dir + '/' + config.run_time + '/'
 

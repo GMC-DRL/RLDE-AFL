@@ -5,7 +5,7 @@ import math
 import torch
 class Memory:
     def __init__(self):
-        self.states = {'x': [], 'y': []}
+        self.states = {'x': [], 'y': [], 'fes': []}
         self.actions = []
         self.logprobs = []
         self.rewards = []
@@ -13,42 +13,24 @@ class Memory:
     def clear_memory(self):
         del self.states['x'][:]
         del self.states['y'][:]
+        del self.states['fes'][:]
         del self.actions[:]
         del self.logprobs[:]
         del self.rewards[:]
 
     def states_append(self, state):
-        x, y = state['x'], state['y']
+        x, y, fes = state['x'], state['y'], state['fes']
         self.states['x'].append(x)
         self.states['y'].append(y)
+        self.states['fes'].append(fes)
 
     def return_states(self):
         # todo 这里还是由于bs =1 直接压缩掉了，后边bs加上后要修改
         # todo [t, bs, ps, dim_f]
         x = np.stack(self.states['x']).squeeze(axis = 1) # 4D [t, 1, ps, dim_f] ------> 3D [t, ps, dim_f]
         y = np.stack(self.states['y']).squeeze(axis = 1)
-        state = {'x' : x, 'y' : y}
-        return state
-class Memory_gleet:
-    def __init__(self):
-        self.states = []
-        self.actions = []
-        self.logprobs = []
-        self.rewards = []
-
-    def clear_memory(self):
-        del self.states[:]
-        del self.actions[:]
-        del self.logprobs[:]
-        del self.rewards[:]
-
-    def states_append(self, state):
-        self.states.append(state)
-
-    def return_states(self):
-        # todo 这里还是由于bs =1 直接压缩掉了，后边bs加上后要修改
-        # todo [t, bs, ps, dim_f]
-        state = np.stack(self.states).squeeze(axis = 1)
+        fes = np.stack(self.states['fes']).squeeze(axis = 1)
+        state = {'x' : x, 'y' : y, 'fes' : fes}
         return state
 
 def save_class(dir, file_name, saving_class):

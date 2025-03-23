@@ -1,46 +1,26 @@
-'''
-agent.py 名字待定
-'''
-
 import torch
-import numpy as np
-from torch import nn
-from agent.networks import MLP, Actor, Critic
-from agent.utils import Memory, Memory_gleet
-from torch.nn import functional as F
-from torch.distributions import Normal
-from Feature_Extractor.feature_extractor import Feature_Extractor, Gleet_FE
-from agent.utils import save_class
+
+from Feature_Extractor.feature_extractor import Feature_Extractor
+from agent.networks import Actor, Critic
+from agent.utils import Memory
 from agent.utils import clip_grad_norms
-from utils import log_to_tb_train, log_to_tb_operator, log_gen_operator
+from agent.utils import save_class
+from utils import log_to_tb_train, log_to_tb_operator
+
 class agent:
     def __init__(self, config):
-        '''
-        一开始创建agent对象， 得到训练数据，train_set
-        然后对每一个问题进行训练， 每次每个问题每个episode初始化env
-        env为种群，应该包括env.step env.reset,
-
-        agent 中应该包括动作维度， 种群编码器FE，
-        状态动作网络Actor，    得到选择哪个动作 以及动作的log_prob
-        状态参数网络configurationNetwork 得到参数配置，和动作结合起来可以更新种群
-
-        主要的函数是train_episode()
-        表示agent与环境交互一轮 然后保存轨迹 使用PPO更新网络参数
-        '''
         self.__config = config
         self.__device = self.__config.device
         # FE
 
-        if self.__config.fe_gleet:
-            self.Fe = Gleet_FE(hidden_dim = self.__config.fe_hidden_dim, device = self.__config.device)
-        else:
-            self.Fe = Feature_Extractor(hidden_dim = self.__config.fe_hidden_dim,
-                                        n_layers = self.__config.fe_n_layers,
-                                        is_mlp = self.__config.mlp,
-                                        device = self.__config.device)
+
+        self.Fe = Feature_Extractor(hidden_dim = self.__config.fe_hidden_dim,
+                                    n_layers = self.__config.fe_n_layers,
+                                    is_mlp = False,
+                                    device = self.__config.device)
 
         # Actor
-        self.Actor = Actor(input_dim = self.__config.fe_hidden_dim,
+        self.Actor = Actor(input_dim = self.__config.fe_hidden_dim + 16,
                            mu_operator = self.__config.mutation_selector.n_operator,
                            cr_operator = self.__config.crossover_selector.n_operator,
                            n_mutation = self.__config.mutation_selector.n_mutation,
@@ -49,7 +29,7 @@ class agent:
                            )
 
         # Critic
-        self.Critic = Critic(input_dim = self.__config.fe_hidden_dim, device=self.__device)
+        self.Critic = Critic(input_dim = self.__config.fe_hidden_dim + 16, device=self.__device)
         self.lr = {
             'fe': self.__config.fe_lr,
             'actor': self.__config.actor_lr,
@@ -106,11 +86,8 @@ class agent:
         self.Critic.train()
 
     def train_episode(self, env, tb_logger = None):
-        if self.__config.fe_gleet:
-            memory = Memory_gleet()
-        else:
-            memory = Memory()
-        state = env.reset()  # state is x and y
+        memory = Memory()
+        state = env.reset()  # state is x and y fes
         # x must be 3D: 1 * n * dim , 1 is tick
         gamma = self.__config.ppo_gamma
         n_step = self.__config.ppo_n_step
@@ -331,12 +308,12 @@ class agent:
             feature = self.Fe(state).squeeze(0).to(self.__device)
             Actor_output = self.Actor.get_action_sample(feature)
             action = Actor_output[0].detach().cpu().numpy()
-            log_gen_operator(mutation_op, crossover_op, self.__config.de_mutation_op, self.__config.crossover_op, action[:, 0],
-                                       action[:, 1])
-            m_mu_gen.append(Actor_output[1].detach().cpu().numpy())
-            m_sigma_gen.append(Actor_output[2].detach().cpu().numpy())
-            c_mu_gen.append(Actor_output[3].detach().cpu().numpy())
-            c_sigma_gen.append(Actor_output[4].detach().cpu().numpy())
+            # log_gen_operator(mutation_op, crossover_op, self.__config.de_mutation_op, self.__config.crossover_op, action[:, 0],
+            #                            action[:, 1])
+            # m_mu_gen.append(Actor_output[1].detach().cpu().numpy())
+            # m_sigma_gen.append(Actor_output[2].detach().cpu().numpy())
+            # c_mu_gen.append(Actor_output[3].detach().cpu().numpy())
+            # c_sigma_gen.append(Actor_output[4].detach().cpu().numpy())
             # action = self.Actor(feature)[0].cpu().numpy()
             state, reward, is_done = env.step(action)
             R += reward

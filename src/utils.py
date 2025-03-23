@@ -4,7 +4,6 @@ from numpy import random
 import os
 from Population import Population
 import torch
-from plot import plot_grad_flow
 
 from tensorboardX import SummaryWriter
 # def construct_problem(problem, dim, upperbound, train_batch_size, test_batch_size, difficulty, instance_seed = 3849):
@@ -152,22 +151,3 @@ def log_gen_operator(mutation_dict, crossover_dict, mutation_op, crossover_op, m
     for i, c_op in enumerate(crossover_op):
         c_cnt = len(np.where(crossover_action == i)[0])
         crossover_dict[c_op].append(c_cnt)
-
-if __name__ == "__main__":
-    problem = 'bbob'
-    dim = 10
-    upperbound = 5
-    train_batch_size = 1
-    test_batch_size = 1
-    difficulty = 'easy'
-    train_set, test_set = construct_problem(problem, dim, upperbound, train_batch_size, test_batch_size, difficulty, instance_seed = 0)
-    f0 = train_set.data[0]
-    print("hello world")
-    # print(f0) 
-    f0.reset()
-    population = Population(pop_size = 50,dim = 10, max_G = 1000, max_fes = 300000, problem = f0)
-    # print('population_x', population.current_vector)
-    # print('population_y', population.current_fitness)
-    
-
-    
