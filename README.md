@@ -47,7 +47,7 @@ outputs
 ## Rollout
 The rollout process can be easily activated via the command below.
 ```bash
-python main.py --test --problem bbob --difficulty difficult --device cuda --max_epoch 100 --pop_size 100 --max_fes 2000 --crossover_op binomial exponential MDE_pBX --reward_ratio 1 --seed 7 --trainset_seed 13 --testset_seed 1024 --rollout_interval 10  --fe_train --run_name test_run --agent_load_dir [The checkpoint saving directory] --agent_model [The purpose model name]; 
+python main.py --test --problem bbob --difficulty difficult --device cuda --max_epoch 100 --pop_size 100 --max_fes 2000 --crossover_op binomial exponential MDE_pBX --reward_ratio 1 --seed 7 --trainset_seed 13 --testset_seed 1024 --rollout_interval 10  --fe_train --run_name test_run --agent_load_dir [The checkpoint saving directory] --agent_model [The purpose model name]
 ```
 To use the test_model.pkl file located in the home directory as the target model, you can modify the command as follows:
 ```bash
