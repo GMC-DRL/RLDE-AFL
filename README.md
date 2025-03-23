@@ -1,40 +1,55 @@
-# RLDE-AFL
+# Reinforcement Learning-based Self-adaptive Differential Evolution through Automated Landscape Feature Learning
 
-the official code implementation of RLDE-AFL
+Here we provide sourcecodes of RLDE-AFL, which has been recently accpeted by GECCO 2025.
 
-the README is going to be refined progressively 
-<!-- which is accepted as a full paper in GECCO 2025 -->
+## Citation
 
-## overview
+The PDF version of the paper is available [here](). If you find our RLDE-AFL useful, please cite it in your publications or projects.
 
-<!-- 这里应该有大致论文里introduction的东西 -->
-<!-- 那张图有点不妥就不想放 -->
-<!-- 以及引用是否还是用这个 -->
+```latex
+@inproceedings{guo2025rldeafl,
+  title={Reinforcement Learning-based Self-adaptive Differential Evolution through Automated Landscape Feature Learning},
+  author={Guo, Hongshu and Ma, Sijie and Huang, Zechuan and Hu, Yuzhi and Ma, Zeyuan and Zhang, Xinglin and Gong, Yue-Jiao},
+  booktitle={},
+  year={2025}
+}
+```
 
-### the conventional mutations
+<!-- ## Requirements
+You can install all of dependencies of RLDE-AFL via the command below.
+```bash
+pip install -r requirements.txt
+``` -->
 
-![Conventional Mutation](introduction/conventional_mutation/overview.png)
+## Train
+The training process can be activated via the command below, which is just an example.
+```bash
+python main.py --run_experiments --problem bbob --difficulty difficult --device cuda --max_epoch 24 --pop_size 100 --max_fes 20000 --crossover_op binomial exponential MDE_pBX --reward_ratio 1 --seed 7 --trainset_seed 13 --testset_seed 1024 --rollout_interval 10  --fe_train --run_name test_run
+```
+For more adjustable settings, please refer to `main.py` and `config.py` for details.
 
-<!-- ![add more](introduction/novel_mutation/mutation7_CoDE/mutation.png) -->
+Recording results: Log files will be saved to `./outputs/logs/train/` . The saved checkpoints will be saved to `./outputs/model/train/`. TensorBoard files will be located in `./tensorboard/`. The file structure is as follow:
+```
+outputs
+|--logs
+   |--train
+      |--run_name
+         |--...
+|--models
+   |--train
+      |--run_name
+         |--Epoch
+            |--epoch1.pkl
+            |--epoch2.pkl
+            |--...
+```
 
-### novel mutations
-
-<!-- | NAME                                                                                      | MUTATION                                                                                                                                  | LINK                                                                        |
-| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| MDE                                                                                       | ![MDE](introduction/novel_mutation/mutation1_MDE/mutation.png)                                                                            | [MDE](introduction/novel_mutation/mutation1_MDE/mutation1.pdf)              |
-| ?                                                                                         | ![MDE_pBX](introduction/novel_mutation/mutation2/mutation.png)                                                                            | [mutation2](introduction/novel_mutation/mutation2/mutation2.pdf)            |
-| JADE                                                                                      | ![JADE](introduction/novel_mutation/mutation3_JADE/mutation.png)                                                                          | [JADE](introduction/novel_mutation/mutation3_JADE/mutation3-jade.pdf)       |
-| Differential evolution with topographical mutation applied to nuclear reactor core design | ![?](introduction/novel_mutation/mutation4/mutation.png)                                                                                  | [mutation4](introduction/novel_mutation/mutation4/mutation4.pdf)            |
-| Proposed Proximity-Based Mutation Framework                                               | ![mutation5](introduction/novel_mutation/mutation5/mutation.png)                                                                          | [mutation5](introduction/novel_mutation/mutation5/mutation5.pdf)            |
-| MADDE                                                                                     | ![MADDE](introduction/novel_mutation/mutation6_MADDE/mutation1&2.png) ![MADDE](introduction/novel_mutation/mutation6_MADDE/mutation3.png) | [MADDE](introduction/novel_mutation/mutation6_MADDE/mutation6-MADDE.pdf)    |
-| HARDDE                                                                                    | ![HARDDE](introduction/novel_mutation/mutation8-HARDDE/mutation.png)                                                                      | [HARDDE](introduction/novel_mutation/mutation8-HARDDE/mutation8-HARDDE.pdf) |
-| An Improved Differential Evolution Algorithm and Its Applications to Orbit Design         | ![?](introduction/novel_mutation/mutation9/mutation.png)                                                                                  | [mutation9](introduction/novel_mutation/mutation9/mutation9.pdf)            | -->
-<!-- 这个太碎了，而且有些没用上，需要重写 -->
-
-## Crossover part
-
-### conventional crossover
-
-### novel crossover
-
-## The Structure
+## Rollout
+The rollout process can be easily activated via the command below.
+```bash
+python main.py --test --problem bbob --difficulty difficult --device cuda --max_epoch 100 --pop_size 100 --max_fes 2000 --crossover_op binomial exponential MDE_pBX --reward_ratio 1 --seed 7 --trainset_seed 13 --testset_seed 1024 --rollout_interval 10  --fe_train --run_name test_run --agent_load_dir [The checkpoint saving directory] --agent_model [The purpose model name]; 
+```
+To use the test_model.pkl file located in the home directory as the target model, you can modify the command as follows:
+```bash
+python main.py --test --problem bbob --difficulty difficult --device cuda --max_epoch 100 --pop_size 100 --max_fes 2000 --crossover_op binomial exponential MDE_pBX --reward_ratio 1 --seed 7 --trainset_seed 13 --testset_seed 1024 --rollout_interval 10  --fe_train --run_name test_run --agent_load_dir ./ --agent_model test_model
+```
