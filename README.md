@@ -4,7 +4,7 @@ Here we provide sourcecodes of RLDE-AFL, which has been recently accpeted by GEC
 
 ## Citation
 
-The PDF version of the paper is available [here](). If you find our RLDE-AFL useful, please cite it in your publications or projects.
+The PDF version of the paper is available [here](http://arxiv.org/abs/2503.18061). If you find our RLDE-AFL useful, please cite it in your publications or projects.
 
 ```latex
 @inproceedings{guo2025rldeafl,
